@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { Switch, Route } from 'react-router-dom';
 import { Link } from 'react-router-dom'
 
 class Home extends Component {
@@ -18,7 +16,6 @@ class Home extends Component {
     this.setState({username : event.target.value});
   }
   handleClick(){
-    var userid = this.state.username;
     window.localStorage.setItem('usernameforapplozicchat', this.state.username);
     window.location.reload()
   }

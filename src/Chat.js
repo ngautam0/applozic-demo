@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { Switch, Route } from 'react-router-dom';
-import { Link } from 'react-router-dom'
-import Home from './Home';
 
 class Chat extends Component {
   constructor(props){
@@ -18,11 +14,13 @@ class Chat extends Component {
     var applozicApplicationKey = "4266051244c910380e4d1db0e1fff6a0";
 
 
-    // var username = "A";
+    var username = "userA";
     // Contacts Array
-    var allContactsArray = ["a","b","c","NFAa","NFAb","NFAc","Nishant"]
+    var allContactsArray = ["usera","userb","userc","nfaa","nfab","nfac"]
     var contactsJSON = [];
-    var isUserFromNFA = this.state.userId.startsWith("NFA");
+    var broadcastJSON = [];
+    var isUserFromNFA = this.state.userId.startsWith("nfa");
+    var isUserSuperUser = this.state.userId === "nfaSuperUser";
     // var groupName = "NFAGroup";
     // var groupId = 8382972;
     var self = this;
@@ -46,24 +44,33 @@ class Chat extends Component {
       autoTypeSearchEnabled : false,     // set to false if you don't want to allow sending message to user who is not in the contact list
       loadOwnContacts : true, //set to true if you want to populate your own contact list (see Step 4 for reference)
       olStatus: true,         //set to true for displaying a green dot in chat screen for users who are online
+      video:true,
+
       onInit : function(response) {
+
         console.log("init complete");
+        console.log(response);
         // debugger;
          if (response === "success") {
             // login successful, perform your actions if any, for example: load contacts, getting unread message count, etc
 
             // window.$applozic.fn.applozic('getGroupList', {'callback':function (response) { //write your logic
               if (isUserFromNFA) {
-                for (var i = 0; i < allContactsArray.length; i++) {
+                for (let i = 0; i < allContactsArray.length; i++) {
                   if (allContactsArray[i]!=self.state.userId) {
                     let tempObject = {"userId":allContactsArray[i]}
+                    let tempObjectBroadcast = {"userId":allContactsArray[i], groupRole : 3}
                     contactsJSON.push(tempObject);
+                    broadcastJSON.push(tempObjectBroadcast)
                   }
                 }
+                console.log(broadcastJSON);
+
+
               }
               else {
-                for (var i = 0; i < allContactsArray.length; i++) {
-                  if (allContactsArray[i].startsWith("NFA") && allContactsArray[i]!=self.state.userId) {
+                for (let i = 0; i < allContactsArray.length; i++) {
+                  if (allContactsArray[i].startsWith("nfa") && allContactsArray[i]!=self.state.userId) {
                     let tempObject = {"userId":allContactsArray[i]}
                     contactsJSON.push(tempObject);
                   }
@@ -71,6 +78,33 @@ class Chat extends Component {
               }
               console.log(contactsJSON);
               window.$applozic.fn.applozic('loadContacts', {"contacts":contactsJSON});
+              if (isUserSuperUser) {
+                window.$applozic.fn.applozic('getGroupList', {'callback':function (response) {
+                  console.log(response);
+                if (response.data.length > 0) {
+                  for (var i = 0; i < response.data.length; i++) {
+                    if (response.data[i].name === "Broadcast Channel") {
+                      console.log("already");
+                      return;
+                      // dont do anything.. broadcast already exists
+                    }
+                  }
+                }
+                console.log(self.state.userId);
+
+                window.$applozic.fn.applozic('createGroup', {'groupName' : "Broadcast Channel",   // required
+                                             'type' : 5, //(required) 1:private, 2:public, 5:broadcast,7:GroupofTwo
+
+                                             // 'groupIcon' : group display image // optional
+                                             'clientGroupId' : '',      // optional
+                                             'users': broadcastJSON,
+                                             'callback' : function(response){console.log(response);}});
+
+
+                }});
+
+              }
+
             //
             // }
             // });
@@ -131,6 +165,8 @@ class Chat extends Component {
            console.log(response);
      }
     });
+
+
 
   }
 

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { Switch, Route } from 'react-router-dom'
 import Home from './Home';
@@ -16,10 +15,6 @@ class App extends Component {
   }
   updateInput(event){
     this.setState({username : event.target.value})
-  }
-  handleClick(){
-    var userid = this.state.username;
-    // this.initializeAppLogic(userid);
   }
 
   render() {
